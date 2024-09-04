@@ -32,7 +32,7 @@ llvm-cov export --format=lcov --ignore-filename-regex='(.cargo/registry|rustc/.*
 python3 lcov_cobertura.py rust-coverage.lcov --output rust-coverage.xml --base-dir rust/coverage-demo/src
 
 java -jar lib/cover-checker-1.5.0-all.jar \
-  -type jacoco target/site/jacoco.xml \
-  -type cobertura rust-coverage.xml \
+  -type jacoco --cover target/site/jacoco/jacoco.xml \
+  -type cobertura --cover rust-coverage.xml \
   --repo "mtopolnik/coverage-demo" --pr $2 --github-token $1 \
   --threshold 50
