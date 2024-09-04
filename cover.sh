@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eux
 
-if [ "$(uname)" -eq "Linux"]; then
+if [ "$(uname)" == "Linux"]; then
   executable_filter="-executable"
   dylib_ext="so"
 else
