@@ -1,3 +1,6 @@
 .idea
 target
 lcov_cobertura.py
+*.profraw
+*.profdata
+rust-coverage*
