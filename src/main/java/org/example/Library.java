@@ -1,6 +1,7 @@
 package org.example;
 
 import java.io.File;
+import java.net.URL;
 
 public class Library {
     public int incIfTrue(int n, boolean condition) {
@@ -15,7 +16,11 @@ public class Library {
 
     static {
         try {
-            System.load(new File(Library.class.getResource("libcoverage_demo.dylib").toURI()).getPath());
+            URL dylibUrl = Library.class.getResource("libcoverage_demo.dylib");
+            if (dylibUrl == null) {
+                dylibUrl = Library.class.getResource("libcoverage_demo.so");
+            }
+            System.load(new File(dylibUrl.toURI()).getPath());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
