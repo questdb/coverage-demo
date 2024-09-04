@@ -43,5 +43,5 @@ python3 lcov_cobertura.py rust-coverage.lcov --output rust-coverage.xml --base-d
 java -jar lib/cover-checker-1.5.0-all.jar \
   -type jacoco --cover target/site/jacoco/jacoco.xml \
   -type cobertura --cover rust-coverage.xml \
-  --repo "mtopolnik/coverage-demo" --pr $2 --github-token $1 \
+  --repo $2 --pr $3 --github-token $1 \
   --threshold 50
