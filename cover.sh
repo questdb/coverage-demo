@@ -21,7 +21,7 @@ PATH=$LLVM_TOOLS_PATH:$PATH
 ./clean.sh
 
 # Maven test with coverage reporting
-LLVM_PROFILE_FILE=maven-test.profraw mvn clean test
+mvn clean test
 
 # Process raw coverage data
 llvm-profdata merge -sparse -o rust-coverage.profdata maven-test.profraw rust/coverage-demo/cargo-test.profraw
