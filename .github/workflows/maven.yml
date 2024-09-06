@@ -24,24 +24,26 @@ jobs:
       run: mvn --batch-mode test
     - name: Coverage Report
       env:
-        PR_ID: ${{ github.event.pull_request.number }}"
+        PR_ID: ${{ github.event.pull_request.number }}
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       run: |
+        set -eux
         # Install LLVM coverage tools
         rustup component add llvm-tools-preview
         LLVM_TOOLS_PATH=$(dirname $(find $HOME/.rustup -name llvm-profdata))
         PATH=$LLVM_TOOLS_PATH:$PATH
         # Turn raw Rust coverage data into Cobertura format
         llvm-profdata merge -sparse -o rust-coverage.profdata maven-test.profraw rust/coverage-demo/cargo-test.profraw
-        test_bin=$(find target/rust-maven-plugin/coverage-demo/debug/deps -type f $executable_filter | grep demo-)
+        test_bin=$(find target/rust-maven-plugin/coverage-demo/debug/deps -type f -executable | grep demo-)
         llvm-cov show --format=html --ignore-filename-regex='(.cargo/registry|rustc/.*\.rs)' \
           --instr-profile rust-coverage.profdata \
           --object $test_bin \
-          --object target/classes/org/example/libcoverage_demo.$dylib_ext \
+          --object target/classes/org/example/libcoverage_demo.so \
           --output-dir=rust-coverage
         llvm-cov export --format=lcov --ignore-filename-regex='(.cargo/registry|rustc/.*\.rs)' \
           --instr-profile rust-coverage.profdata \
           --object $test_bin \
-          --object target/classes/org/example/libcoverage_demo.$dylib_ext \
+          --object target/classes/org/example/libcoverage_demo.so \
           > rust-coverage.lcov
         [ ! -f lcov_cobertura.py ] && wget \
         https://raw.githubusercontent.com/eriwen/lcov-to-cobertura-xml/master/lcov_cobertura/lcov_cobertura.py
@@ -51,5 +53,5 @@ jobs:
         java -jar lib/cover-checker-1.5.0-all.jar \
           -type jacoco --cover target/site/jacoco/jacoco.xml \
           -type cobertura --cover rust-coverage.xml \
-          --repo mtopolnik/coverage-demo --pr $PR_ID --github-token $GITHUB_TOKEN \
+          --repo mtopolnik/coverage-demo --pr $PR_ID --github-token $ACCESS_TOKEN \
           --threshold 75
