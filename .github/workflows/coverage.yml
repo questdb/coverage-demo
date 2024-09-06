@@ -20,7 +20,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
+    - name: Test with Coverage
       run: mvn --batch-mode test
     - name: Coverage Report
       env:
