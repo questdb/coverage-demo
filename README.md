@@ -1,8 +1,9 @@
 # Combined Java & Rust Code Coverage Demo
 
-Showcases the tools and steps needed to create a test coverage report that
-involves both Java and Rust code, including Rust code accessed by JUnit tests
-via JNI.
+This is a demo project that goes along a
+[blog post](https://questdb.io/blog/rust-coverage/). It showcases the tools and
+steps needed to create a test coverage report that involves both Java and Rust
+code, including Rust code accessed by JUnit tests via JNI.
 
 The file `cover.sh` is a standalone script you can run locally to get the
 coverage reports, as well as publish the results to an arbitrary PR you
