@@ -1,6 +1,3 @@
-# Build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
 name: Test and Report Coverage
 
 on:
