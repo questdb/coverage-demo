@@ -1,4 +1,9 @@
 #!/bin/bash
+
+if [ "$3" == "" ]; then
+  echo "Usage: cover.sh <github-access-token> <repo-name> <pr-id>"
+fi
+
 set -eux
 
 if [ "$(uname)" == "Linux" ]; then
@@ -21,9 +26,9 @@ PATH=$LLVM_TOOLS_PATH:$PATH
 ./clean.sh
 
 # Maven test with coverage reporting
-mvn clean test
+mvn test
 
-# Turn raw Rust coverage data into Cobertura format
+# Turn raw Rust coverage data into HTML and Cobertura format
 llvm-profdata merge -sparse -o rust-coverage.profdata maven-test.profraw rust/coverage-demo/cargo-test.profraw
 test_bin=$(find target/rust-maven-plugin/coverage-demo/debug/deps -type f $executable_filter | grep demo-)
 llvm-cov show --format=html --ignore-filename-regex='(.cargo/registry|rustc/.*\.rs)' \
@@ -40,9 +45,9 @@ llvm-cov export --format=lcov --ignore-filename-regex='(.cargo/registry|rustc/.*
   https://raw.githubusercontent.com/eriwen/lcov-to-cobertura-xml/master/lcov_cobertura/lcov_cobertura.py
 python3 lcov_cobertura.py rust-coverage.lcov --base-dir rust/coverage-demo/src --output rust-coverage.xml
 
-# Use Cover Checker to post the combined coverage report to the pull request
+# Use Cover Checker to post the combined coverage report to a pull request
 java -jar lib/cover-checker-1.5.0-all.jar \
   -type jacoco --cover target/site/jacoco/jacoco.xml \
   -type cobertura --cover rust-coverage.xml \
   --repo $2 --pr $3 --github-token $1 \
-  --threshold 50
+  --threshold 75
