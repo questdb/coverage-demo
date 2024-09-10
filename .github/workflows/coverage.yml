@@ -2,49 +2,49 @@ name: Test and Report Coverage
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Test with Coverage
-      run: mvn --batch-mode test
-    - name: Coverage Report
-      env:
-        PR_ID: ${{ github.event.pull_request.number }}
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-      run: |
-        set -eux
-        # Install LLVM coverage tools
-        rustup component add llvm-tools-preview
-        LLVM_TOOLS_PATH=$(dirname $(find $HOME/.rustup -name llvm-profdata))
-        PATH=$LLVM_TOOLS_PATH:$PATH
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
+      - name: Test with Coverage
+        run: mvn --batch-mode test
+      - name: Coverage Report
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+          set -eux
+          # Install LLVM coverage tools
+          rustup component add llvm-tools-preview
+          LLVM_TOOLS_PATH=$(dirname $(find $HOME/.rustup -name llvm-profdata))
+          PATH=$LLVM_TOOLS_PATH:$PATH
 
-        # Turn raw Rust coverage data into Cobertura format
-        llvm-profdata merge -sparse -o rust-coverage.profdata maven-test.profraw rust/coverage-demo/cargo-test.profraw
-        test_bin=$(find target/rust-maven-plugin/coverage-demo/debug/deps -type f -executable | grep demo-)
-        llvm-cov export --format=lcov --ignore-filename-regex='(.cargo/registry|rustc/.*\.rs)' \
-          --instr-profile rust-coverage.profdata \
-          --object $test_bin \
-          --object target/classes/org/example/libcoverage_demo.so \
-          > rust-coverage.lcov
-        [ ! -f lcov_cobertura.py ] && wget \
-          https://raw.githubusercontent.com/eriwen/lcov-to-cobertura-xml/master/lcov_cobertura/lcov_cobertura.py
-        python3 lcov_cobertura.py rust-coverage.lcov --base-dir rust/coverage-demo/src --output rust-coverage.xml
-        
-        # Use Cover Checker to post the combined coverage report to the pull request
-        java -jar lib/cover-checker-1.5.0-all.jar \
-          -type jacoco --cover target/site/jacoco/jacoco.xml \
-          -type cobertura --cover rust-coverage.xml \
-          --repo mtopolnik/coverage-demo --pr $PR_ID --github-token $ACCESS_TOKEN \
-          --threshold 75
+          # Turn raw Rust coverage data into Cobertura format
+          llvm-profdata merge -sparse -o rust-coverage.profdata maven-test.profraw rust/coverage-demo/cargo-test.profraw
+          test_bin=$(find target/rust-maven-plugin/coverage-demo/debug/deps -type f -executable | grep demo-)
+          llvm-cov export --format=lcov --ignore-filename-regex='(.cargo/registry|rustc/.*\.rs)' \
+            --instr-profile rust-coverage.profdata \
+            --object $test_bin \
+            --object target/classes/org/example/libcoverage_demo.so \
+            > rust-coverage.lcov
+          [ ! -f lcov_cobertura.py ] && wget \
+            https://raw.githubusercontent.com/eriwen/lcov-to-cobertura-xml/master/lcov_cobertura/lcov_cobertura.py
+          python3 lcov_cobertura.py rust-coverage.lcov --base-dir rust/coverage-demo/src --output rust-coverage.xml
+
+          # Use Cover Checker to post the combined coverage report to the pull request
+          java -jar lib/cover-checker-1.5.0-all.jar \
+            -type jacoco --cover target/site/jacoco/jacoco.xml \
+            -type cobertura --cover rust-coverage.xml \
+            --repo questdb/coverage-demo --pr $PR_ID --github-token $ACCESS_TOKEN \
+            --threshold 75
